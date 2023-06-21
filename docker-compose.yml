@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  database: 
+    image: mariadb:10.6.14
+    container_name: my-database-1
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: examen
+    ports:
+      - 3306:3306
+    volumes:
+      - ./dbdata/mariadb:/var/lib/mysql
+
+  mongodb:
+    image: mongo:6.0
+    container_name: my-mongodb
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongodb-data:/data/db
+
+  servidor:
+    container_name: express-server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      PORT: 3000
+      DATABASE_HOST: database
+      DATABASE_USER: root
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: examen
+    restart: always
+    depends_on:
+      - database
+      - mongodb
+    ports:
+      - 3000:3000
+    volumes:
+      - ./server:/server
